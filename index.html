@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebXR Demo</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <canvas id="canvas"></canvas>
+    <div id="vr-container">
+        <button id="vr-button" disabled>Enter VR</button>
+    </div>
+    <div id="info">
+        <p>WebXR Boids with Hand Tracking</p>
+        <p id="hand-tracking-status">Hand tracking status: Checking...</p>
+        <p id="hand-position-info">Hand position offset: (0, 1.3, 0)</p>
+        <p id="pinch-status">Pinch status: No pinch detected</p>
+        <p class="controls-info">Use arrow keys to adjust hand position (Up/Down/Left/Right)<br>
+           PageUp/PageDown for forward/backward, Home to reset</p>
+        <p class="pinch-info">Pinch your thumb and index finger together to attract boids to your hand</p>
+    </div>
+
+    <!-- Floating Menu for Boid Parameters -->
+    <div id="floating-menu">
+        <div id="floating-menu-header">
+            <h3>Boid Parameters</h3>
+            <button id="floating-menu-toggle">−</button>
+        </div>
+
+        <div id="menu-content">
+            <!-- Separation Parameters -->
+            <div class="menu-section">
+                <h4>Separation</h4>
+                <div class="slider-container">
+                    <label for="separation-distance">Distance</label>
+                    <div class="slider-row">
+                        <input type="range" id="separation-distance" min="0.1" max="3.0" step="0.1" value="0.8">
+                        <span class="slider-value" id="separation-distance-value">0.8</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="separation-force">Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="separation-force" min="0.1" max="3.0" step="0.1" value="1.0">
+                        <span class="slider-value" id="separation-force-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alignment Parameters -->
+            <div class="menu-section">
+                <h4>Alignment</h4>
+                <div class="slider-container">
+                    <label for="alignment-distance">Distance</label>
+                    <div class="slider-row">
+                        <input type="range" id="alignment-distance" min="0.1" max="5.0" step="0.1" value="1.5">
+                        <span class="slider-value" id="alignment-distance-value">1.5</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="alignment-force">Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="alignment-force" min="0.1" max="2.0" step="0.1" value="0.6">
+                        <span class="slider-value" id="alignment-force-value">0.6</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cohesion Parameters -->
+            <div class="menu-section">
+                <h4>Cohesion</h4>
+                <div class="slider-container">
+                    <label for="cohesion-distance">Distance</label>
+                    <div class="slider-row">
+                        <input type="range" id="cohesion-distance" min="0.1" max="5.0" step="0.1" value="1.8">
+                        <span class="slider-value" id="cohesion-distance-value">1.8</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="cohesion-force">Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="cohesion-force" min="0.1" max="2.0" step="0.1" value="0.5">
+                        <span class="slider-value" id="cohesion-force-value">0.5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boundary Parameters -->
+            <div class="menu-section">
+                <h4>Boundary</h4>
+                <div class="slider-container">
+                    <label for="boundary-radius">Radius</label>
+                    <div class="slider-row">
+                        <input type="range" id="boundary-radius" min="1.0" max="10.0" step="0.5" value="5.0">
+                        <span class="slider-value" id="boundary-radius-value">5.0</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="boundary-force">Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="boundary-force" min="0.05" max="1.0" step="0.05" value="0.2">
+                        <span class="slider-value" id="boundary-force-value">0.2</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Attraction Parameters -->
+            <div class="menu-section">
+                <h4>Attraction</h4>
+                <div class="slider-container">
+                    <label for="attraction-distance">Distance</label>
+                    <div class="slider-row">
+                        <input type="range" id="attraction-distance" min="0.5" max="5.0" step="0.1" value="2.0">
+                        <span class="slider-value" id="attraction-distance-value">2.0</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="attraction-force">Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="attraction-force" min="0.1" max="3.0" step="0.1" value="1.0">
+                        <span class="slider-value" id="attraction-force-value">1.0</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boid Movement Parameters -->
+            <div class="menu-section">
+                <h4>Boid Movement</h4>
+                <div class="slider-container">
+                    <label for="max-speed">Max Speed</label>
+                    <div class="slider-row">
+                        <input type="range" id="max-speed" min="0.01" max="0.1" step="0.01" value="0.04">
+                        <span class="slider-value" id="max-speed-value">0.04</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="max-force">Max Force</label>
+                    <div class="slider-row">
+                        <input type="range" id="max-force" min="0.001" max="0.02" step="0.001" value="0.005">
+                        <span class="slider-value" id="max-force-value">0.005</span>
+                    </div>
+                </div>
+                <div class="slider-container">
+                    <label for="smoothing-factor">Smoothing</label>
+                    <div class="slider-row">
+                        <input type="range" id="smoothing-factor" min="0.1" max="0.95" step="0.05" value="0.8">
+                        <span class="slider-value" id="smoothing-factor-value">0.8</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boid Count -->
+            <div class="menu-section">
+                <h4>Boid Count</h4>
+                <div class="slider-container">
+                    <label for="boid-count">Count</label>
+                    <div class="slider-row">
+                        <input type="range" id="boid-count" min="10" max="200" step="10" value="30">
+                        <span class="slider-value" id="boid-count-value">30</span>
+                    </div>
+                </div>
+                <button id="reset-boids" class="menu-button">Reset Boids</button>
+            </div>
+
+            <!-- Reset All Parameters -->
+            <button id="reset-params" class="menu-button">Reset All Parameters</button>
+        </div>
+    </div>
+
+    <!-- Import Three.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
+
+    <!-- Import our scripts -->
+    <script src="menu.js" type="module"></script>
+    <script src="index.js" type="module"></script>
+</body>
+</html>
